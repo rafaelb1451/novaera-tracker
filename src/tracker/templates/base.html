@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ titulo | default('Nova Era Tracker') }}</title>
+    
+    <!-- Tailwind CSS (estilização rápida via CDN) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- HTMX (interatividade sem JS complexo) -->
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    
+    <style>
+        .htmx-indicator { display: none; }
+        .htmx-request .htmx-indicator { display: inline; }
+        .htmx-request.htmx-indicator { display: inline; }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800 font-sans antialiased">
+    
+    <!-- Navbar -->
+    <nav class="bg-blue-800 text-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center">
+                    <span class="font-bold text-xl tracking-tight">🛒 Nova Era Tracker</span>
+                </div>
+                <div class="flex space-x-4">
+                    <a href="/" class="hover:bg-blue-700 px-3 py-2 rounded-md text-sm font-medium">Painel</a>
+                    <a href="/docs" target="_blank" class="hover:bg-blue-700 px-3 py-2 rounded-md text-sm font-medium">API Docs</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Conteúdo Principal -->
+    <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+        {% block content %}{% endblock %}
+    </main>
+
+</body>
+</html>

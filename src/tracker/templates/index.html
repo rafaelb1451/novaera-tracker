@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="bg-white shadow rounded-lg p-6 mb-6">
+    <h1 class="text-2xl font-bold mb-4">Consulta de Preços</h1>
+    
+    <!-- Input de busca com HTMX -->
+    <div class="flex gap-2">
+        <input 
+            type="text" 
+            name="busca" 
+            placeholder="Digite o nome do produto (ex: arroz, leite)..." 
+            class="w-full border-gray-300 rounded-md shadow-sm px-4 py-2 focus:ring-blue-500 focus:border-blue-500"
+            hx-get="/partials/produtos"
+            hx-trigger="keyup changed delay:500ms, search"
+            hx-target="#tabela-produtos"
+            hx-indicator="#loading"
+        >
+    </div>
+    
+    <div id="loading" class="htmx-indicator text-blue-600 mt-2">
+        Buscando produtos...
+    </div>
+</div>
+
+<!-- Onde os resultados serão injetados -->
+<div class="bg-white shadow rounded-lg overflow-hidden">
+    <div id="tabela-produtos">
+        <div class="p-6 text-center text-gray-500">
+            Digite algo na barra acima para buscar os produtos.
+        </div>
+    </div>
+</div>
+{% endblock %}
