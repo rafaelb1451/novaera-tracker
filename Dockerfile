@@ -15,14 +15,16 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Copia os arquivos de dependência
 COPY pyproject.toml README.md ./
 COPY src/ ./src/
-COPY src/tracker/static/ ./src/tracker/static/
-COPY src/tracker/templates/ ./src/tracker/templates/
 COPY alembic.ini ./
 COPY alembic/ ./alembic/
 COPY scripts/ ./scripts/
 
 # Instala as dependências do projeto
-RUN pip install --no-cache-dir .
+RUN pip install --no-cache-dir 
+
+#  A CORREÇÃO: Copia static e templates para dentro da pasta do pacote instalado
+COPY src/tracker/static/ /usr/local/lib/python3.11/site-packages/tracker/static/
+COPY src/tracker/templates/ /usr/local/lib/python3.11/site-packages/tracker/templates/
 
 # Expõe a porta que o Railway usa (ele injeta a variável $PORT)
 EXPOSE 8000
