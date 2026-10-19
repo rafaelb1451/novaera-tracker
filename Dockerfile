@@ -15,6 +15,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Copia os arquivos de dependência
 COPY pyproject.toml README.md ./
 COPY src/ ./src/
+COPY src/tracker/static/ ./src/tracker/static/
+COPY src/tracker/templates/ ./src/tracker/templates/
 COPY alembic.ini ./
 COPY alembic/ ./alembic/
 COPY scripts/ ./scripts/
