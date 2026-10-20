@@ -43,6 +43,7 @@ def processar_e_salvar_produtos(db: Session, supermercado_id: int, produtos_cole
                 nome=p.nome,
                 marca=p.marca,
                 link=p.link,
+                imagem_url=p.imagem_url,
             )
             db.add(produto_db)
             db.flush() # Gera o ID do produto sem commitar ainda
@@ -52,8 +53,8 @@ def processar_e_salvar_produtos(db: Session, supermercado_id: int, produtos_cole
             produto_db.nome = p.nome
             produto_db.marca = p.marca
             produto_db.link = p.link
+            produto_db.imagem_url = p.imagem_url
             atualizados += 1
-
         # 2. Salva o preço atual
         preco_db = Preco(
             produto_id=produto_db.id,
@@ -72,14 +73,11 @@ def executar_coleta_por_termo(db: Session, termo: str):
     """Orquestra a coleta para um termo de busca específico."""
     log.info("iniciando_coleta", termo=termo)
     
-    # 1. Configura o coletor
     coletor = NovaEraCollector()
     sm = obter_ou_criar_supermercado(db, "Nova Era", coletor.base_url)
 
-    # 2. Puxa os dados da API (simulando o Plano B que funcionou)
     dados_brutos = coletor._get("/api/catalog_system/pub/products/search", params={"ft": termo, "_from": 0, "_to": 19})
     
-    # 3. Transforma o JSON bruto no nosso DTO ProdutoColetado
     produtos_formatados = []
     for prod in dados_brutos:
         for item in prod.get("items", []):
@@ -89,6 +87,11 @@ def executar_coleta_por_termo(db: Session, termo: str):
                 if preco is None or preco <= 0:
                     continue
                 
+                # Captura a imagem se existir
+                imagem_url = None
+                if item.get("images") and len(item["images"]) > 0:
+                    imagem_url = item["images"][0].get("imageUrl")
+
                 from tracker.collectors.base import ProdutoColetado
                 produtos_formatados.append(
                     ProdutoColetado(
@@ -98,6 +101,7 @@ def executar_coleta_por_termo(db: Session, termo: str):
                         nome=prod.get("productName", ""),
                         marca=prod.get("brand"),
                         link=prod.get("link"),
+                        imagem_url=imagem_url, # <-- NOVO
                         categoria_id_externo=None,
                         preco=float(preco),
                         preco_lista=float(oferta.get("ListPrice") or 0) or None,
@@ -107,7 +111,6 @@ def executar_coleta_por_termo(db: Session, termo: str):
                     )
                 )
 
-    # 4. Salva no banco
     if produtos_formatados:
         processar_e_salvar_produtos(db, sm.id, produtos_formatados)
     

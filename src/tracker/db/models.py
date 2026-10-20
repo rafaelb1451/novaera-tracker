@@ -90,6 +90,7 @@ class Produto(Base):
     nome: Mapped[str] = mapped_column(Text, nullable=False)
     marca: Mapped[str | None] = mapped_column(String(255), nullable=True)
     link: Mapped[str | None] = mapped_column(Text, nullable=True)
+    imagem_url: Mapped[str | None] = mapped_column(Text, nullable=True) # <-- NOVA COLUNA
     criado_em: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now()
     )

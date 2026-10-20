@@ -19,13 +19,13 @@ class ProdutoColetado:
     nome: str
     marca: str | None
     link: str | None
+    imagem_url: str | None # <-- NOVO
     categoria_id_externo: str | None
     preco: float
     preco_lista: float | None
     disponivel: int
     seller: str | None
     coletado_em: datetime
-
 
 class BaseCollector(ABC):
     """Interface que todo coletor de supermercado deve implementar."""

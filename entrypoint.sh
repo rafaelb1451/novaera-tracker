@@ -4,11 +4,7 @@ set -e
 echo "Rodando migrações do banco de dados..."
 python -m alembic upgrade head
 
-echo "Criando usuário administrador (se não existir)..."
-python -m scripts.criar_admin
-
 echo "Verificando se o banco precisa ser populado..."
-# Comando python para checar se há produtos
 HAS_PRODUTOS=$(python -c "from tracker.db.session import SessionLocal; from tracker.db.models import Produto; db = SessionLocal(); print(db.query(Produto).count() > 0); db.close()" | tail -n 1)
 
 if [ "$HAS_PRODUTOS" = "False" ]; then
