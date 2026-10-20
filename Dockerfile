@@ -29,5 +29,11 @@ COPY src/tracker/templates/ /usr/local/lib/python3.11/site-packages/tracker/temp
 # Expõe a porta que o Railway usa (ele injeta a variável $PORT)
 EXPOSE 8000
 
-# Comando para rodar a aplicação em produção
-CMD uvicorn tracker.main:app --host 0.0.0.0 --port ${PORT:-8000}
+# Copia o script de entrada
+COPY entrypoint.sh ./
+RUN chmod +x entrypoint.sh
+
+# ... (mantenha as outras linhas de COPY e RUN pip install) ...
+
+# Substitui o CMD antigo por este:
+CMD ["./entrypoint.sh"]
