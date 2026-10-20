@@ -10,6 +10,11 @@ from tracker.config import get_settings
 from tracker.logging import setup_logging
 from tracker.api.routes import produtos, auth
 from tracker.db.models import Usuario
+from sqlalchemy import select, desc
+from sqlalchemy.orm import Session
+from tracker.db.session import get_db
+from tracker.db.models import Produto, Preco
+from typing import Annotated
 
 setup_logging()
 log = structlog.get_logger()
@@ -60,15 +65,43 @@ def painel_home(
 def partial_produtos(
     request: Request, 
     busca: str = "",
+    db: Annotated[Session, Depends(get_db)] = None,
     usuario_logado: Usuario = Depends(auth.get_usuario_logado)
 ):
-    import httpx
-    import os
-    # Pega a URL base da API (se estiver no Railway, usa o domínio público)
-    base_url = os.getenv("RAILWAY_PUBLIC_DOMAIN", "http://localhost:8000")
-    r = httpx.get(f"https://{base_url}/api/produtos?busca={busca}&limite=50" if not base_url.startswith("http") else f"{base_url}/api/produtos?busca={busca}&limite=50")
-    
-    produtos_lista = r.json() if r.status_code == 200 else []
+    # Mesma lógica da API, mas buscando direto do banco para ser mais rápido no Render
+    subq = (
+        select(
+            Preco.produto_id,
+            Preco.preco,
+            Preco.preco_lista,
+            Preco.tempo,
+            Preco.disponivel
+        )
+        .distinct(Preco.produto_id)
+        .order_by(Preco.produto_id, desc(Preco.tempo))
+        .subquery()
+    )
+
+    stmt = (
+        select(Produto, subq.c.preco, subq.c.preco_lista, subq.c.tempo, subq.c.disponivel)
+        .join(subq, Produto.id == subq.c.produto_id)
+        .order_by(desc(subq.c.tempo))
+        .limit(50)
+    )
+
+    if busca:
+        stmt = stmt.where(Produto.nome.ilike(f"%{busca}%"))
+
+    resultados = db.execute(stmt).all()
+
+    produtos_lista = [
+        {
+            "nome": p.Produto.nome,
+            "marca": p.Produto.marca,
+            "preco": float(p.preco) if p.preco else 0.0,
+        }
+        for p in resultados
+    ]
     
     return templates.TemplateResponse(
         request=request, 
